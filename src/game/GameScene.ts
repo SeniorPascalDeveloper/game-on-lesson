@@ -12,9 +12,9 @@ const ENEMY_MAX_SPEED = 230;   // меньше скорости игрока, ч
  * пока ему мешает красный квадрат, который гонится за ним.
  */
 export class GameScene extends Phaser.Scene {
-  private player!: Phaser.GameObjects.Rectangle;
+  private player!: Phaser.GameObjects.Image;
   private target!: Phaser.GameObjects.Arc;
-  private enemy!: Phaser.GameObjects.Rectangle; // НОВОЕ: преследователь
+  private enemy!: Phaser.GameObjects.Image; // НОВОЕ: преследователь
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: Record<'up' | 'down' | 'left' | 'right', Phaser.Input.Keyboard.Key>;
   private scoreText!: Phaser.GameObjects.Text;
@@ -23,6 +23,11 @@ export class GameScene extends Phaser.Scene {
 
   constructor() {
     super('GameScene');
+  }
+
+  preload(): void {
+    this.load.image('player', new URL('./1.jpg', import.meta.url).href);
+    this.load.image('enemy', new URL('./2.jpg', import.meta.url).href);
   }
 
   create(): void {
@@ -34,7 +39,7 @@ export class GameScene extends Phaser.Scene {
 
     // ИЗМЕНЕНО: заголовок заменён на подсказку управления
     this.add
-      .text(width / 2, 28, 'Собирай монеты и убегай от красного!', {
+      .text(width / 2, 28, 'Собирай сыр и убегай от кошки!', {
         fontFamily: 'system-ui, sans-serif',
         fontSize: '24px',
         color: '#ffffff',
@@ -49,11 +54,11 @@ export class GameScene extends Phaser.Scene {
       })
       .setOrigin(0.5, 0);
 
-    this.player = this.add.rectangle(width / 2, height / 2, 42, 42, 0x38bdf8);
+    this.player = this.add.image(width / 2, height / 2, 'player').setDisplaySize(63, 63);
     this.target = this.add.circle(width * 0.72, height * 0.52, 18, 0xfacc15);
 
     // НОВОЕ: враг появляется в левом верхнем углу, далеко от игрока
-    this.enemy = this.add.rectangle(60, 160, 42, 42, 0xef4444);
+    this.enemy = this.add.image(60, 160, 'enemy').setDisplaySize(105, 105);
 
     this.scoreText = this.add.text(24, height - 48, 'Score: 0', {
       fontFamily: 'system-ui, sans-serif',
@@ -99,7 +104,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private keepPlayerOnScreen(): void {
-    const half = this.player.width / 2;
+    const half = this.player.displayWidth / 2;
     this.player.x = Phaser.Math.Clamp(this.player.x, half, this.scale.width - half);
     this.player.y = Phaser.Math.Clamp(this.player.y, 110 + half, this.scale.height - half);
   }
