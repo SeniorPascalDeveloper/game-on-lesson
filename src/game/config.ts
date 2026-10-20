@@ -1,13 +1,14 @@
 import Phaser from 'phaser';
 import { GameScene } from './GameScene';
+import { GAME } from './settings'; // ИЗМЕНЕНО: размеры и фон из settings.ts
 
 export function createGame(parent: string): Phaser.Game {
   const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     parent,
-    width: 960,
-    height: 640,
-    backgroundColor: '#0f172a',
+    width: GAME.width,                       // ИЗМЕНЕНО
+    height: GAME.height,                     // ИЗМЕНЕНО
+    backgroundColor: GAME.backgroundColor,   // ИЗМЕНЕНО
     scene: [GameScene],
     scale: {
       mode: Phaser.Scale.FIT,
