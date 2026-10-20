@@ -46,14 +46,6 @@ export class GameScene extends Phaser.Scene {
       })
       .setOrigin(0.5, 0);
 
-    this.add
-      .text(width / 2, 68, 'Стрелки / WASD — движение', {
-        fontFamily: 'system-ui, sans-serif',
-        fontSize: '18px',
-        color: '#cbd5e1',
-      })
-      .setOrigin(0.5, 0);
-
     this.player = this.add.image(width / 2, height / 2, 'player').setDisplaySize(63, 63);
     this.target = this.add.circle(width * 0.72, height * 0.52, 18, 0xfacc15);
 
