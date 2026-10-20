@@ -17,8 +17,12 @@ export class GameScene extends Phaser.Scene {
   private enemy!: Phaser.GameObjects.Image; // НОВОЕ: преследователь
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: Record<'up' | 'down' | 'left' | 'right', Phaser.Input.Keyboard.Key>;
+  private pauseKey!: Phaser.Input.Keyboard.Key;
   private scoreText!: Phaser.GameObjects.Text;
+  private pauseText!: Phaser.GameObjects.Text;
+  private pauseButton!: Phaser.GameObjects.Text;
   private score = 0;
+  private isPaused = false;
   private isGameOver = false; // НОВОЕ: состояние поражения
 
   constructor() {
@@ -35,7 +39,9 @@ export class GameScene extends Phaser.Scene {
 
     // НОВОЕ: сброс состояния, иначе после Restart останутся старые значения
     this.score = 0;
+    this.isPaused = false;
     this.isGameOver = false;
+    this.time.paused = false;
 
     // ИЗМЕНЕНО: заголовок заменён на подсказку управления
     this.add
@@ -48,6 +54,30 @@ export class GameScene extends Phaser.Scene {
 
     this.player = this.add.image(width / 2, height / 2, 'player').setDisplaySize(63, 63);
     this.target = this.add.circle(width * 0.72, height * 0.52, 18, 0xfacc15);
+    this.pauseText = this.add
+      .text(width / 2, height / 2, 'ПАУЗА\nP или кнопка в углу — продолжить', {
+        fontFamily: 'system-ui, sans-serif',
+        fontSize: '30px',
+        color: '#ffffff',
+        align: 'center',
+        backgroundColor: '#000000aa',
+        padding: { x: 20, y: 16 },
+      })
+      .setOrigin(0.5)
+      .setDepth(1)
+      .setVisible(false);
+    this.pauseButton = this.add
+      .text(width - 32, 32, 'Ⅱ', {
+        fontFamily: 'system-ui, sans-serif',
+        fontSize: '28px',
+        color: '#ffffff',
+        backgroundColor: '#334155',
+        padding: { x: 12, y: 8 },
+      })
+      .setOrigin(0.5)
+      .setDepth(2)
+      .setInteractive({ useHandCursor: true })
+      .on('pointerdown', () => this.togglePause());
 
     // НОВОЕ: враг появляется в левом верхнем углу, далеко от игрока
     this.enemy = this.add.image(60, 160, 'enemy').setDisplaySize(105, 105);
@@ -69,10 +99,13 @@ export class GameScene extends Phaser.Scene {
       left: Phaser.Input.Keyboard.KeyCodes.A,
       right: Phaser.Input.Keyboard.KeyCodes.D,
     }) as Record<'up' | 'down' | 'left' | 'right', Phaser.Input.Keyboard.Key>;
+    this.pauseKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
   }
 
   update(_time: number, delta: number): void {
     if (this.isGameOver) return; // НОВОЕ: после поражения игра замирает
+    if (Phaser.Input.Keyboard.JustDown(this.pauseKey)) this.togglePause();
+    if (this.isPaused) return;
 
     const seconds = delta / 1000;
     let dx = 0;
@@ -93,6 +126,13 @@ export class GameScene extends Phaser.Scene {
     this.checkTarget();
     this.moveEnemy(seconds); // НОВОЕ: враг идёт к игроку
     this.checkEnemyHit();    // НОВОЕ: касание врага = проигрыш
+  }
+
+  private togglePause(): void {
+    this.isPaused = !this.isPaused;
+    this.time.paused = this.isPaused;
+    this.pauseText.setVisible(this.isPaused);
+    this.pauseButton.setText(this.isPaused ? '▶' : 'Ⅱ');
   }
 
   private keepPlayerOnScreen(): void {
